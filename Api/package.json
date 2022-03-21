@@ -1,0 +1,25 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "API MyPharma",
+  "main": "server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "author": "Thiago Almeida Amorim",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^16.0.0",
+    "faker": "^6.6.6",
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^7.6.2",
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.2.7"
+  }
+}
