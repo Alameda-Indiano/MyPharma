@@ -93,7 +93,7 @@ module.exports = {
     ListProduct: async (req, res) => {
         
         try {
-            const Product = await ProductModel.find();
+            const Product = await ProductModel.find().populate('category brand');
     
             if (!Product) {
                 return res.status(500).json({
@@ -122,7 +122,7 @@ module.exports = {
         const { id } = req.params;
 
         try {
-            const Product = await ProductModel.findById(id);
+            const Product = await ProductModel.findById(id).populate('category brand');
     
             if (!Product) {
                 return res.status(500).json({
