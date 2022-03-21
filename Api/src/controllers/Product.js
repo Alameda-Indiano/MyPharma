@@ -126,10 +126,10 @@ module.exports = {
                 });
             };
 
-            if (await ProductModel.findOne({ name })) {
+            if (!await ProductModel.findById( req.params.id )) {
                 return res.status(400).json({
                     error: true, 
-                    message: 'Um produto com este nome já foi cadastrado no banco de dados'
+                    message: 'Não existe nenhum produto com o ID informado cadastrado no banco de dados'
                 });
             };
 
@@ -184,7 +184,7 @@ module.exports = {
                 });
             };
 
-            const Error = await ProductModel.findByIdAndRemove(id, { new: true });
+            const Error = await ProductModel.findByIdAndRemove(id);
 
             if (!Error) {
                 return res.status(500).json({
@@ -194,8 +194,7 @@ module.exports = {
             };
 
             return res.status(201).json({
-                error: false, 
-                product: NewProduct,
+                error: false,
                 token:  req.RefreshToken.JWT
             });
 
