@@ -42,6 +42,63 @@ module.exports = {
             
         };
 
-    }
+    },
+
+    ListCategory: async (req, res) => {
+        
+        try {
+            const Category = await CategoryModel.find();
+    
+            if (!Category) {
+                return res.status(500).json({
+                    error: true, 
+                    message: 'Nenhum produto cadastrado! Tente novamente mais tarde'
+                });
+            };
+
+            return res.status(200).json({
+                error: false, 
+                Category: Category,
+                token:  req.RefreshToken.JWT
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                error: true, 
+                message: error.message
+            });
+
+        };
+    
+    },
+
+    ListOneCategory: async (req, res) => {
+
+        try {
+
+            const Category = await CategoryModel.findById(req.params.id);
+    
+            if (!Category) {
+                return res.status(500).json({
+                    error: true, 
+                    message: 'Nenhum produto cadastrado! Tente novamente mais tarde'
+                });
+            };
+
+            return res.status(200).json({
+                error: false, 
+                Category: Category,
+                token:  req.RefreshToken.JWT
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                error: true, 
+                message: error.message
+            });
+
+        };
+
+    },
 
 };
