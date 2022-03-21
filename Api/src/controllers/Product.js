@@ -1,8 +1,10 @@
 const ProductModel = require('../models/Product');
+const CategoryModel = require('../models/Category');
+const BrandModel = require('../models/Brand');
 
 module.exports = {
     CreateNewProduct: async (req, res) => {
-        const { name, description, price } = req.body;
+        const { name, description, price, category, brand } = req.body;
 
         try {
             if (!name) {
@@ -33,7 +35,31 @@ module.exports = {
                 });
             };
 
-            const NewProduct = await ProductModel.create({ name, description, price });
+            const AtualizeCategory = await CategoryModel.findById(category);
+
+            if (!AtualizeCategory) {
+                return res.status(401).json({
+                    error: true,
+                    message: 'A categoria informada não existe'
+                });
+            };
+
+            const AtualizeBrand = await BrandModel.findById(brand);
+
+            if (!AtualizeBrand) {
+                return res.status(401).json({
+                    error: true,
+                    message: 'A marca informada não existe'
+                });
+            };
+
+            const NewProduct = await ProductModel.create({ 
+                name, 
+                description, 
+                price,
+                category, 
+                brand
+            });
 
             if (!NewProduct) {
                 return res.status(500).json({
@@ -41,6 +67,12 @@ module.exports = {
                     message: 'Não foi possível cadastrar um novo produto! Tente novamente mais tarde'
                 });
             };
+
+            await AtualizeCategory.products.push(NewProduct);
+            await AtualizeCategory.save();
+
+            await AtualizeBrand.products.push(NewProduct);
+            await AtualizeBrand.save();
 
             return res.status(201).json({
                 error: false, 
