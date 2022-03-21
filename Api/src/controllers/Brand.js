@@ -119,7 +119,7 @@ module.exports = {
                 });
             };
 
-            const NewBrand = await BrandModel.findByIdAndUpdate(req.params.id, { name });
+            const NewBrand = await BrandModel.findByIdAndUpdate(req.params.id, { name }, { new: true });
 
             if (!NewBrand) {
                 return res.status(500).json({

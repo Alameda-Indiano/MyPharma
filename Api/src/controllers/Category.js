@@ -134,7 +134,7 @@ module.exports = {
                 });
             };
 
-            const NewCategory = await CategoryModel.findByIdAndUpdate(req.params.id, { name, description });
+            const NewCategory = await CategoryModel.findByIdAndUpdate(req.params.id, { name, description }, { new: true });
 
             if (!NewCategory) {
                 return res.status(500).json({
