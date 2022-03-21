@@ -12,6 +12,13 @@ module.exports = {
                 });
             };
 
+            if (await BrandModel.findOne({ name })) {
+                return res.status(401).json({
+                    error: true,
+                    message: 'Não é possível cadastrar duas marcas com o mesmo nome'
+                });
+            };
+
             const NewBrand = await BrandModel.create({ name });
 
             if (!NewBrand) {
@@ -93,5 +100,5 @@ module.exports = {
         };
 
     },
-    
+
 };

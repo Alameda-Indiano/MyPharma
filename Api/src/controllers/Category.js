@@ -1,4 +1,5 @@
 const CategoryModel = require('../models/Category');
+const ProductModel = require('../models/Product');
 
 module.exports = {
     CreateNewCategory: async (req, res) => {
@@ -9,6 +10,13 @@ module.exports = {
                 return res.status(401).json({
                     error: true, 
                     message: 'É necessário informar um nome para a nova Categoria'
+                });
+            };
+
+            if (await CategoryModel.findOne({ name })) {
+                return res.status(401).json({
+                    error: true,
+                    message: 'Não é possível cadastrar duas categorias com o mesmo nome'
                 });
             };
 

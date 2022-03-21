@@ -3,7 +3,8 @@ const mongoose = require('../DataBase/mongoDB');
 const CategorySchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
     },
     description: {
         type: String,
@@ -12,7 +13,6 @@ const CategorySchema = new mongoose.Schema({
     products: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
-        required: true
     }],
     creatdAt: {
         type: String,
