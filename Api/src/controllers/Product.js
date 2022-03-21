@@ -148,20 +148,13 @@ module.exports = {
     },
 
     UpdateProduct: async (req, res) => {
-        const { name, description, price } = req.body;
+        const { name, description, price, category, brand } = req.body;
 
         try {
             if (!name) {
                 return res.status(401).json({
                     error: true,
                     message: 'É necessário informar o nome do produto antes de prosseguir'
-                });
-            };
-
-            if (!await ProductModel.findById( req.params.id )) {
-                return res.status(400).json({
-                    error: true, 
-                    message: 'Não existe nenhum produto com o ID informado cadastrado no banco de dados'
                 });
             };
 
@@ -179,7 +172,69 @@ module.exports = {
                 });
             };
 
-            const NewProduct = await ProductModel.findByIdAndUpdate(req.params.id, { name, description, price }, { new: true });
+            const OldProduct = await ProductModel.findById( req.params.id );
+
+            if (!OldProduct) {
+                return res.status(400).json({
+                    error: true, 
+                    message: 'Não existe nenhum produto com o ID informado cadastrado no banco de dados'
+                });
+            };
+
+            const OldCategory = await CategoryModel.findById(OldProduct.category);
+
+            if (!OldCategory) {
+                return res.status(500).json({
+                    error: true,
+                    message: 'Nenhuma categoria foi cadastrada anteriormente ao produto'
+                });
+            };
+
+            const PositionProductCategory = await OldCategory.products.indexOf(OldProduct._id)
+            await OldCategory.products.splice(PositionProductCategory, 1);
+            OldCategory.save();
+
+            const OldBrand = await BrandModel.findById(OldProduct.brand);
+
+            if (!OldBrand) {
+                return res.status(500).json({
+                    error: true,
+                    message: 'Nenhuma categoria foi cadastrada anteriormente ao produto'
+                });
+            };
+
+            const PositionProductBrand = await OldBrand.products.indexOf(OldProduct._id)
+            await OldBrand.products.splice(PositionProductBrand, 1);
+            OldBrand.save();
+
+            const AtualizeCategory = await CategoryModel.findById(category);
+
+            if (!AtualizeCategory) {
+                return res.status(401).json({
+                    error: true,
+                    message: 'A categoria informada não existe'
+                });
+            };
+
+            const AtualizeBrand = await BrandModel.findById(brand);
+
+            if (!AtualizeBrand) {
+                return res.status(401).json({
+                    error: true,
+                    message: 'A marca informada não existe'
+                });
+            };
+
+            const NewProduct = await ProductModel.findByIdAndUpdate(req.params.id, 
+                { 
+                    name, 
+                    description, 
+                    price,
+                    category,
+                    brand 
+                    
+                }, { new: true }
+            );
 
             if (!NewProduct) {
                 return res.status(500).json({
@@ -187,6 +242,12 @@ module.exports = {
                     message: 'Não foi possível cadastrar um novo produto! Tente novamente mais tarde'
                 });
             };
+
+            await AtualizeCategory.products.push(NewProduct);
+            await AtualizeCategory.save();
+
+            await AtualizeBrand.products.push(NewProduct);
+            await AtualizeBrand.save();
 
             return res.status(201).json({
                 error: false, 
