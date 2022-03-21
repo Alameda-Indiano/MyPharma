@@ -158,6 +158,13 @@ module.exports = {
                 });
             };
 
+            if (await ProductModel.findOne({ name })) {
+                return res.status(400).json({
+                    error: true, 
+                    message: 'Um produto com este nome já foi cadastrado no banco de dados'
+                });
+            };
+
             if (!description) {
                 return res.status(401).json({
                     error: true,
@@ -192,7 +199,7 @@ module.exports = {
 
             const PositionProductCategory = await OldCategory.products.indexOf(OldProduct._id)
             await OldCategory.products.splice(PositionProductCategory, 1);
-            OldCategory.save();
+            await OldCategory.save();
 
             const OldBrand = await BrandModel.findById(OldProduct.brand);
 
@@ -205,7 +212,7 @@ module.exports = {
 
             const PositionProductBrand = await OldBrand.products.indexOf(OldProduct._id)
             await OldBrand.products.splice(PositionProductBrand, 1);
-            OldBrand.save();
+            await OldBrand.save();
 
             const AtualizeCategory = await CategoryModel.findById(category);
 
@@ -266,28 +273,56 @@ module.exports = {
     },
 
     RemoveProduct: async (req, res) => {
-        const { id } = req.params;
 
         try {
 
-            if (!id) {
-                return res.status(401).json({
+            const ProductFilter = await ProductModel.findById( req.params.id );
+
+            if (!ProductFilter) {
+                return res.status(400).json({
                     error: true, 
-                    message: 'É necessário informar o id do produto que você deseja deletar'
+                    message: 'Não existe nenhum produto com o ID informado cadastrado no banco de dados'
                 });
             };
 
-            const Error = await ProductModel.findByIdAndRemove(id);
+            const Category = await CategoryModel.findById(ProductFilter.category);
 
-            if (!Error) {
+            if (!Category) {
                 return res.status(500).json({
-                    error: true, 
-                    message: 'Não foi possível deletar o produto! Tente novamente mais tarde'
+                    error: true,
+                    message: 'Nenhuma categoria foi cadastrada anteriormente ao produto'
+                });
+            };
+
+            const PositionProductCategory = await Category.products.indexOf(ProductFilter._id)
+            await Category.products.splice(PositionProductCategory, 1);
+            await Category.save();
+
+            const Brand = await BrandModel.findById(ProductFilter.brand);
+
+            if (!Brand) {
+                return res.status(500).json({
+                    error: true,
+                    message: 'Nenhuma categoria foi cadastrada anteriormente ao produto'
+                });
+            };
+
+            const PositionProductBrand = await Brand.products.indexOf(ProductFilter._id)
+            await Brand.products.splice(PositionProductBrand, 1);
+            await Brand.save();
+
+            const ProductRemove = await ProductModel.findByIdAndDelete(req.params.id);
+
+            if (!ProductRemove) {
+                return res.status(500).json({
+                    error: true,
+                    message: 'Não foi possível remover o produto! Tente novamente mais tarde'
                 });
             };
 
             return res.status(201).json({
                 error: false,
+                message: 'Produto removido com sucesso',
                 token:  req.RefreshToken.JWT
             });
 
