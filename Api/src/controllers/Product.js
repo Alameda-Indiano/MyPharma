@@ -172,7 +172,7 @@ module.exports = {
 
     },
 
-    UpdateProduct: async (req, res) => {
+    RemoveProduct: async (req, res) => {
         const { id } = req.params;
 
         try {
