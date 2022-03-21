@@ -36,5 +36,62 @@ module.exports = {
         };
 
     },
+
+    ListBrand: async (req, res) => {
+        
+        try {
+            const Brand = await BrandModel.find();
+    
+            if (!Brand) {
+                return res.status(500).json({
+                    error: true, 
+                    message: 'Nenhum produto cadastrado! Tente novamente mais tarde'
+                });
+            };
+
+            return res.status(200).json({
+                error: false, 
+                Brand: Brand,
+                token:  req.RefreshToken.JWT
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                error: true, 
+                message: error.message
+            });
+
+        };
+    
+    },
+
+    ListOneBrand: async (req, res) => {
+
+        try {
+
+            const Brand = await BrandModel.findById(req.params.id);
+    
+            if (!Brand) {
+                return res.status(500).json({
+                    error: true, 
+                    message: 'Nenhum produto cadastrado! Tente novamente mais tarde'
+                });
+            };
+
+            return res.status(200).json({
+                error: false, 
+                Brand: Brand,
+                token:  req.RefreshToken.JWT
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                error: true, 
+                message: error.message
+            });
+
+        };
+
+    },
     
 };
