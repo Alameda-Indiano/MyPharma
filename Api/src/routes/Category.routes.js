@@ -5,7 +5,8 @@ const {
     CreateNewCategory,
     ListOneCategory,
     ListCategory,
-    UpdateCategory
+    UpdateCategory,
+    DeleteCategory
     
 } = require('../controllers/Category')
 
@@ -13,5 +14,6 @@ routes.post('/Category/Create', VerifyToken, RefreshToken, CreateNewCategory);
 routes.get('/Category/:id', VerifyToken, RefreshToken, ListOneCategory);
 routes.get('/Category', VerifyToken, RefreshToken, ListCategory);
 routes.put('/Category/Atualize/:id', VerifyToken, RefreshToken, UpdateCategory);
+routes.delete('/Category/Delete/:id', VerifyToken, RefreshToken, DeleteCategory);
 
 module.exports = routes;
