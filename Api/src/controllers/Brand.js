@@ -1,4 +1,5 @@
 const BrandModel = require('../models/Brand');
+const ProductModel = require('../models/Product');
 
 module.exports = {
     CreateNewBrand: async (req, res) => {
@@ -140,6 +141,95 @@ module.exports = {
                 message: error.message
             });
             
+        };
+
+    },
+
+    DeleteBrand: async (req, res) => {
+        const { NewBrand } = req.body;
+
+        try {
+
+            const BrandFilter = await BrandModel.findById(req.params.id);
+
+            if (!BrandFilter) {
+                return res.status(500).json({
+                    error: true,
+                    message: 'A marca não existe! Tente novamente mais tarde'
+                });
+            };
+
+            const Products = await ProductModel.find({ brand: BrandFilter._id });
+
+            if (!Products[0]) {
+                const BrandRemove = await BrandModel.findByIdAndDelete(req.params.id);
+
+                if (!BrandRemove) {
+                    return res.status(500).json({
+                        error: true,
+                        message: 'Não foi possível remover a marca! Tente novamente mais tarde'
+                    });
+                };
+    
+                return res.status(201).json({
+                    error: false,
+                    message: 'Marca removida com sucesso',
+                    token:  req.RefreshToken.JWT
+                });
+
+            };
+
+            if (!NewBrand) {
+                return res.status(401).json({
+                    error: true,
+                    message: 'É necessário informar uma nova marca para os produtos antes de deletar a atual'
+                });
+            };
+
+            await Promise.all(Products.map( async (product) => {
+                const NewBrandProduct = await ProductModel.findByIdAndUpdate(product._id, { brand: NewBrand }, { new: true });
+
+                if (!NewBrandProduct) {
+                    return res.status(500).json({
+                        error: true,
+                        message: 'Não foi possível atualizar a marca dos produtos! Tente novamente mais tarde'
+                    });
+                };
+
+                const AtualizeBrand = await BrandModel.findById(NewBrand);
+
+                if (!AtualizeBrand) {
+                    return res.status(500).json({
+                        error: true, 
+                        message: 'Não foi possível localizar a nova marca! Tente novamente mais tarde'
+                    });
+                };
+
+                await AtualizeBrand.products.push(NewBrandProduct);
+                await AtualizeBrand.save();
+
+            }));
+
+            const BrandRemove = await BrandModel.findByIdAndDelete(req.params.id);
+
+            if (!BrandRemove) {
+                return res.status(500).json({
+                    error: true,
+                    message: 'Não foi possível remover a marca! Tente novamente mais tarde'
+                });
+            };
+
+            return res.status(201).json({
+                error: false,
+                message: 'Marca removida com sucesso',
+                token:  req.RefreshToken.JWT
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                error: true, 
+                message: error.message
+            });
         };
 
     }
