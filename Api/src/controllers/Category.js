@@ -163,12 +163,6 @@ module.exports = {
         const { NewCategory } = req.body;
 
         try {
-            if (!NewCategory) {
-                return res.status(401).json({
-                    error: true,
-                    message: 'É necessário informar uma nova categoria para os produtos antes de deletar a atual'
-                });
-            };
 
             const CategoryFilter = await CategoryModel.findById(req.params.id);
 
@@ -181,10 +175,28 @@ module.exports = {
 
             const Products = await ProductModel.find({ category: CategoryFilter._id });
 
-            if (!Products) {
-                return res.status(500).json({
+            if (!Products[0]) {
+                const CategoryRemove = await CategoryModel.findByIdAndDelete(req.params.id);
+
+                if (!CategoryRemove) {
+                    return res.status(500).json({
+                        error: true,
+                        message: 'Não foi possível remover a categoria! Tente novamente mais tarde'
+                    });
+                };
+    
+                return res.status(201).json({
+                    error: false,
+                    message: 'Categoria removida com sucesso',
+                    token:  req.RefreshToken.JWT
+                });
+                
+            };
+
+            if (!NewCategory) {
+                return res.status(401).json({
                     error: true,
-                    message: 'Nenhum produto pertence a esta categoria! Tente novamente mais tarde'
+                    message: 'É necessário informar uma nova categoria para os produtos antes de deletar a atual'
                 });
             };
 
