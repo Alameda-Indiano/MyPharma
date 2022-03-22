@@ -157,6 +157,83 @@ module.exports = {
             
         };
 
+    },
+
+    DeleteCategory: async (req, res) => {
+        const { NewCategory } = req.body;
+
+        try {
+            if (!NewCategory) {
+                return res.status(401).json({
+                    error: true,
+                    message: 'É necessário informar uma nova categoria para os produtos antes de deletar a atual'
+                });
+            };
+
+            const CategoryFilter = await CategoryModel.findById(req.params.id);
+
+            if (!CategoryFilter) {
+                return res.status(500).json({
+                    error: true,
+                    message: 'A categoria não existe! Tente novamente mais tarde'
+                });
+            };
+
+            const Products = await ProductModel.find({ category: CategoryFilter._id });
+
+            if (!Products) {
+                return res.status(500).json({
+                    error: true,
+                    message: 'Nenhum produto pertence a esta categoria! Tente novamente mais tarde'
+                });
+            };
+
+            await Promise.all(Products.map( async (product) => {
+                const NewCategoryProduct = await ProductModel.findByIdAndUpdate(product._id, { category: NewCategory }, { new: true });
+
+                if (!NewCategoryProduct) {
+                    return res.status(500).json({
+                        error: true,
+                        message: 'Não foi possível atualizar a categoria dos produtos! Tente novamente mais tarde'
+                    });
+                };
+
+                const AtualizeCategory = await CategoryModel.findById(NewCategory);
+
+                if (!AtualizeCategory) {
+                    return res.status(500).json({
+                        error: true, 
+                        message: 'Não foi possível localizar a nova categoria! Tente novamente mais tarde'
+                    });
+                };
+
+                await AtualizeCategory.products.push(NewCategoryProduct);
+                await AtualizeCategory.save();
+
+            }));
+
+            const CategoryRemove = await CategoryModel.findByIdAndDelete(req.params.id);
+
+            if (!CategoryRemove) {
+                return res.status(500).json({
+                    error: true,
+                    message: 'Não foi possível remover a categoria! Tente novamente mais tarde'
+                });
+            };
+
+            return res.status(201).json({
+                error: false,
+                message: 'Categoria removida com sucesso',
+                token:  req.RefreshToken.JWT
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                error: true, 
+                message: error.message
+            });
+        };
+
     }
 
 };
