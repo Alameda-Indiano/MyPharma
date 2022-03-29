@@ -11,7 +11,7 @@ module.exports = {
             if(ExistRole){
                 return res.status(400).json({
                     error: true,
-                    message: 'Já existe uma permissão deste tipo cadastrada'
+                    message: 'Já existe uma função deste tipo cadastrada'
                 });
             };
 
