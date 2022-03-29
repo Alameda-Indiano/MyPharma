@@ -9,10 +9,7 @@ const {
 
 } = require('../util/Generator');
 
-const { 
-    EncryptedPasswordChecker 
-
-} = require('../util/Verify');
+const { EncryptedPasswordChecker } = require('../util/Verify');
 
 module.exports = {
     CreateNewUser: async (req, res) => {
@@ -65,9 +62,11 @@ module.exports = {
                 });
             };
 
+            delete NewUser.password;
+
             return res.status(201).json({
                 error: false,
-                NewUser
+                user: NewUser
             });
 
         } catch (error) {

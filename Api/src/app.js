@@ -24,6 +24,7 @@ class AppController {
         this.express.use(require('./routes/Products.routes'));
         this.express.use(require('./routes/Category.routes'));
         this.express.use(require('./routes/Brand.routes'));
+        this.express.use(require('./routes/Permission.routes'));
     };
 };
 
