@@ -8,7 +8,7 @@ const {
     UpdatePermission,
     DeletePermission
     
-} = require('../controllers/Permission')
+} = require('../controllers/Permission.controller')
 
 routes.post('/Permission/Create', VerifyToken, RefreshToken, CreateNewPermission);
 routes.get('/Permission/:id', VerifyToken, RefreshToken, ListOnePermission);

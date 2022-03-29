@@ -8,7 +8,7 @@ const {
     UpdateBrand,
     DeleteBrand
 
-} = require('../controllers/Brand')
+} = require('../controllers/Brand.controller')
 
 routes.post('/Brand/Create', VerifyToken, RefreshToken, CreateNewBrand);
 routes.get('/Brand/:id', VerifyToken, RefreshToken, ListOneBrand);

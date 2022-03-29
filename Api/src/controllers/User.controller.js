@@ -1,4 +1,4 @@
-const UserModel = require('../models/User');
+const UserModel = require('../models/User.model');
 const SendEmail = require('../Services/Emails/SendEmail');
 const { EmailResetPassword } = require('../Services/Emails/Templates/ResetPassword');
 

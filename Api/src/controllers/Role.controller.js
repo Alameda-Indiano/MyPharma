@@ -1,32 +1,32 @@
-const PermissionModel = require('../models/Permission');
+const RoleModel = require('../models/Role.model');
 
 module.exports = {
-    CreateNewPermission: async (req, res) => {
+    CreateNewRole: async (req, res) => {
         const { name, description } = req.body;
 
         try {
             
-            const ExistPermission = await PermissionModel.findOne({ name });
+            const ExistRole = await RoleModel.findOne({ name });
 
-            if(ExistPermission){
+            if(ExistRole){
                 return res.status(400).json({
                     error: true,
                     message: 'Já existe uma permissão deste tipo cadastrada'
                 });
             };
 
-            const NewPermission = await PermissionModel.create({ name, description });
+            const NewRole = await RoleModel.create({ name, description });
 
-            if(!NewPermission){
+            if(!NewRole){
                 return res.status(501).json({
                     error: true, 
-                    message: 'Não foi possível cadastrar uma nova permissão! Tente novamente mais tarde'
+                    message: 'Não foi possível cadastrar uma nova função! Tente novamente mais tarde'
                 });
             };
 
             return res.status(201).json({
                 error: false, 
-                permission: NewPermission,
+                Role: NewRole,
                 token:  req.RefreshToken.JWT
             });
 
@@ -39,7 +39,7 @@ module.exports = {
 
     },
 
-    ListPermission: async (req, res) => {
+    ListRole: async (req, res) => {
         
         try {
             
@@ -52,7 +52,7 @@ module.exports = {
 
     },
 
-    ListOnePermission: async (req, res) => {
+    ListOneRole: async (req, res) => {
 
         try {
             
@@ -65,7 +65,7 @@ module.exports = {
 
     },
 
-    UpdatePermission: async (req, res) => {
+    UpdateRole: async (req, res) => {
 
         try {
             
@@ -78,7 +78,7 @@ module.exports = {
 
     },
 
-    DeletePermission: async (req, res) => {
+    DeleteRole: async (req, res) => {
 
         try {
             

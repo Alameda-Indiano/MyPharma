@@ -9,7 +9,7 @@ const {
     SendEmailToResetPassword,
     RedefinePassword
 
-} = require('../controllers/UserSession');
+} = require('../controllers/User.controller');
 
 routes.post('/User/Create', CreateNewUser);
 routes.post('/User/Login', ConnectUser);

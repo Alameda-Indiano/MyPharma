@@ -9,14 +9,15 @@ const PermissionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    creatdAt: {
-        type: String,
-        default: Date.now
-    },
     roles: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Role',
     }],
+    creatdAt: {
+        type: String,
+        default: Date.now
+    },
+
 });
 
 const PermissionModel = mongoose.model('Permission', PermissionSchema);

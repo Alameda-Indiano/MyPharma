@@ -1,6 +1,6 @@
-const ProductModel = require('../models/Product');
-const CategoryModel = require('../models/Category');
-const BrandModel = require('../models/Brand');
+const ProductModel = require('../models/Product.model');
+const CategoryModel = require('../models/Category.model');
+const BrandModel = require('../models/Brand.model');
 
 module.exports = {
     CreateNewProduct: async (req, res) => {

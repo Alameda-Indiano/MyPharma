@@ -8,7 +8,7 @@ const {
     UpdateCategory,
     DeleteCategory
     
-} = require('../controllers/Category')
+} = require('../controllers/Category.controller')
 
 routes.post('/Category/Create', VerifyToken, RefreshToken, CreateNewCategory);
 routes.get('/Category/:id', VerifyToken, RefreshToken, ListOneCategory);

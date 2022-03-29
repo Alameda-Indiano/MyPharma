@@ -1,4 +1,4 @@
-const UserModel = require('../models/User');
+const UserModel = require('../models/User.model');
 const { JWTGenerator } = require('../util/Generator');
 const { TokenChecker } = require('../util/Verify');
 

@@ -8,7 +8,7 @@ const {
     UpdateProduct,
     RemoveProduct
     
-} = require('../controllers/Product')
+} = require('../controllers/Product.controller')
 
 routes.post('/Product/Create', VerifyToken, RefreshToken, CreateNewProduct);
 routes.get('/Product/:id', VerifyToken, RefreshToken, ListOneProduct);

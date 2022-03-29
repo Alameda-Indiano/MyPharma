@@ -1,9 +1,9 @@
-const BrandModel = require('../models/Brand');
-const ProductModel = require('../models/Product');
+const CategoryModel = require('../models/Category.model');
+const ProductModel = require('../models/Product.model');
 
 module.exports = {
-    CreateNewBrand: async (req, res) => {
-        const { name } = req.body;
+    CreateNewCategory: async (req, res) => {
+        const { name, description } = req.body;
 
         try {
             if (!name) {
@@ -13,16 +13,23 @@ module.exports = {
                 });
             };
 
-            if (await BrandModel.findOne({ name })) {
+            if (await CategoryModel.findOne({ name })) {
                 return res.status(401).json({
                     error: true,
-                    message: 'Não é possível cadastrar duas marcas com o mesmo nome'
+                    message: 'Não é possível cadastrar duas categorias com o mesmo nome'
                 });
             };
 
-            const NewBrand = await BrandModel.create({ name });
+            if (!description) {
+                return res.status(401).json({
+                    error: true, 
+                    message: 'É necessário informar uma breve descrição para a nova Categoria'
+                });
+            };
 
-            if (!NewBrand) {
+            const NewCategory = await CategoryModel.create({ name, description });
+
+            if (!NewCategory) {
                 return res.status(500).json({
                     error: true,
                     message: 'Não foi possível cadastrar a nova categoria! Tente novamente mais tarde'
@@ -31,7 +38,7 @@ module.exports = {
 
             return res.status(201).json({
                 error: false,
-                Brand: NewBrand,
+                category: NewCategory,
                 token: req.RefreshToken.JWT
             });
 
@@ -45,12 +52,12 @@ module.exports = {
 
     },
 
-    ListBrand: async (req, res) => {
+    ListCategory: async (req, res) => {
         
         try {
-            const Brand = await BrandModel.find();
+            const Category = await CategoryModel.find();
     
-            if (!Brand) {
+            if (!Category) {
                 return res.status(500).json({
                     error: true, 
                     message: 'Nenhum produto cadastrado! Tente novamente mais tarde'
@@ -59,7 +66,7 @@ module.exports = {
 
             return res.status(200).json({
                 error: false, 
-                Brand: Brand,
+                Category: Category,
                 token:  req.RefreshToken.JWT
             });
 
@@ -73,13 +80,13 @@ module.exports = {
     
     },
 
-    ListOneBrand: async (req, res) => {
+    ListOneCategory: async (req, res) => {
 
         try {
 
-            const Brand = await BrandModel.findById(req.params.id);
+            const Category = await CategoryModel.findById(req.params.id);
     
-            if (!Brand) {
+            if (!Category) {
                 return res.status(500).json({
                     error: true, 
                     message: 'Nenhum produto cadastrado! Tente novamente mais tarde'
@@ -88,7 +95,7 @@ module.exports = {
 
             return res.status(200).json({
                 error: false, 
-                Brand: Brand,
+                Category: Category,
                 token:  req.RefreshToken.JWT
             });
 
@@ -102,8 +109,8 @@ module.exports = {
 
     },
 
-    UpdateBrand: async (req, res) => {
-        const { name } = req.body;
+    UpdateCategory: async (req, res) => {
+        const { name, description } = req.body;
 
         try {
             if (!name) {
@@ -113,16 +120,23 @@ module.exports = {
                 });
             };
 
-            if (await BrandModel.findOne({ name })) {
+            if (await CategoryModel.findOne({ name })) {
                 return res.status(401).json({
                     error: true,
-                    message: 'Não é possível cadastrar duas marcas com o mesmo nome'
+                    message: 'Não é possível cadastrar duas categorias com o mesmo nome'
                 });
             };
 
-            const NewBrand = await BrandModel.findByIdAndUpdate(req.params.id, { name }, { new: true });
+            if (!description) {
+                return res.status(401).json({
+                    error: true, 
+                    message: 'É necessário informar uma breve descrição para a nova Categoria'
+                });
+            };
 
-            if (!NewBrand) {
+            const NewCategory = await CategoryModel.findByIdAndUpdate(req.params.id, { name, description }, { new: true });
+
+            if (!NewCategory) {
                 return res.status(500).json({
                     error: true,
                     message: 'Não foi possível cadastrar a nova categoria! Tente novamente mais tarde'
@@ -131,7 +145,7 @@ module.exports = {
 
             return res.status(201).json({
                 error: false,
-                Brand: NewBrand,
+                category: NewCategory,
                 token: req.RefreshToken.JWT
             });
 
@@ -145,83 +159,83 @@ module.exports = {
 
     },
 
-    DeleteBrand: async (req, res) => {
-        const { NewBrand } = req.body;
+    DeleteCategory: async (req, res) => {
+        const { NewCategory } = req.body;
 
         try {
 
-            const BrandFilter = await BrandModel.findById(req.params.id);
+            const CategoryFilter = await CategoryModel.findById(req.params.id);
 
-            if (!BrandFilter) {
+            if (!CategoryFilter) {
                 return res.status(500).json({
                     error: true,
-                    message: 'A marca não existe! Tente novamente mais tarde'
+                    message: 'A categoria não existe! Tente novamente mais tarde'
                 });
             };
 
-            const Products = await ProductModel.find({ brand: BrandFilter._id });
+            const Products = await ProductModel.find({ category: CategoryFilter._id });
 
             if (!Products[0]) {
-                const BrandRemove = await BrandModel.findByIdAndDelete(req.params.id);
+                const CategoryRemove = await CategoryModel.findByIdAndDelete(req.params.id);
 
-                if (!BrandRemove) {
+                if (!CategoryRemove) {
                     return res.status(500).json({
                         error: true,
-                        message: 'Não foi possível remover a marca! Tente novamente mais tarde'
+                        message: 'Não foi possível remover a categoria! Tente novamente mais tarde'
                     });
                 };
     
                 return res.status(201).json({
                     error: false,
-                    message: 'Marca removida com sucesso',
+                    message: 'Categoria removida com sucesso',
                     token:  req.RefreshToken.JWT
                 });
-
+                
             };
 
-            if (!NewBrand) {
+            if (!NewCategory) {
                 return res.status(401).json({
                     error: true,
-                    message: 'É necessário informar uma nova marca para os produtos antes de deletar a atual'
+                    message: 'É necessário informar uma nova categoria para os produtos antes de deletar a atual'
                 });
             };
 
             await Promise.all(Products.map( async (product) => {
-                const NewBrandProduct = await ProductModel.findByIdAndUpdate(product._id, { brand: NewBrand }, { new: true });
+                const NewCategoryProduct = await ProductModel.findByIdAndUpdate(product._id, { category: NewCategory }, { new: true });
 
-                if (!NewBrandProduct) {
+                if (!NewCategoryProduct) {
                     return res.status(500).json({
                         error: true,
-                        message: 'Não foi possível atualizar a marca dos produtos! Tente novamente mais tarde'
+                        message: 'Não foi possível atualizar a categoria dos produtos! Tente novamente mais tarde'
                     });
                 };
 
-                const AtualizeBrand = await BrandModel.findById(NewBrand);
+                const AtualizeCategory = await CategoryModel.findById(NewCategory);
 
-                if (!AtualizeBrand) {
+                if (!AtualizeCategory) {
                     return res.status(500).json({
                         error: true, 
-                        message: 'Não foi possível localizar a nova marca! Tente novamente mais tarde'
+                        message: 'Não foi possível localizar a nova categoria! Tente novamente mais tarde'
                     });
                 };
 
-                await AtualizeBrand.products.push(NewBrandProduct);
-                await AtualizeBrand.save();
+                await AtualizeCategory.products.push(NewCategoryProduct);
+                await AtualizeCategory.save();
 
             }));
 
-            const BrandRemove = await BrandModel.findByIdAndDelete(req.params.id);
+            const CategoryRemove = await CategoryModel.findByIdAndDelete(req.params.id);
 
-            if (!BrandRemove) {
+            if (!CategoryRemove) {
                 return res.status(500).json({
                     error: true,
-                    message: 'Não foi possível remover a marca! Tente novamente mais tarde'
+                    message: 'Não foi possível remover a categoria! Tente novamente mais tarde'
                 });
             };
 
             return res.status(201).json({
                 error: false,
-                message: 'Marca removida com sucesso',
+                message: 'Categoria removida com sucesso',
                 token:  req.RefreshToken.JWT
             });
 
