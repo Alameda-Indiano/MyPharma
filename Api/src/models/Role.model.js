@@ -12,6 +12,7 @@ const RoleSchema = new mongoose.Schema({
     permissions: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Permission',
+        required: true
     }],
     users: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -21,7 +22,7 @@ const RoleSchema = new mongoose.Schema({
         type: String,
         default: Date.now
     }
-    
+
 });
 
 const RoleModel = mongoose.model('Role', RoleSchema);

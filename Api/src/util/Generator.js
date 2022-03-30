@@ -8,7 +8,7 @@ module.exports = {
         
     },
 
-    JWTGenerator: (params = { id, email }) => {
+    JWTGenerator: (params = { id, email, role }) => {
         return sign(params, process.env.SECRET_JWT, {
             expiresIn: 60 * 60 // 1h
         });
