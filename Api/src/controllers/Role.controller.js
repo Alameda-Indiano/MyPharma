@@ -1,8 +1,9 @@
 const RoleModel = require('../models/Role.model');
+const PermissionModel = require('../models/Permission.model');
 
 module.exports = {
     CreateNewRole: async (req, res) => {
-        const { name, description } = req.body;
+        const { name, description, permission } = req.body;
 
         try {
             
@@ -24,9 +25,20 @@ module.exports = {
                 });
             };
 
+            await Promise.all(permission.map( async (permi) => {
+                const PermissionFilter = await PermissionModel.findById(permi);
+                
+                PermissionFilter.roles.push(NewRole._id);
+                PermissionFilter.save();
+                
+                await NewRole.permissions.push(permi);    
+            }));
+            
+            await NewRole.save();
+            
             return res.status(201).json({
                 error: false, 
-                Role: NewRole,
+                role: NewRole,
                 token:  req.RefreshToken.JWT
             });
 

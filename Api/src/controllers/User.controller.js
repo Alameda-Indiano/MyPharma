@@ -1,4 +1,5 @@
 const UserModel = require('../models/User.model');
+const RoleModel = require('../models/Role.model');
 const SendEmail = require('../Services/Emails/SendEmail');
 const { EmailResetPassword } = require('../Services/Emails/Templates/ResetPassword');
 
@@ -53,8 +54,8 @@ module.exports = {
                 });
             };
 
-            const NewUser = await UserModel.create({ name, email, password: EncryptedPassword });
-
+            const NewUser = await UserModel.create({ name, email, password: EncryptedPassword, role: process.env.Role_User });
+            
             if (!NewUser) {
                 return res.status(500).json({
                     error: true, 
@@ -62,7 +63,11 @@ module.exports = {
                 });
             };
 
-            delete NewUser.password;
+            const FilterRole = await RoleModel.findById(process.env.Role_User);
+            FilterRole.users.push(NewUser._id);
+            FilterRole.save();
+            
+            NewUser.password = undefined;
 
             return res.status(201).json({
                 error: false,
@@ -117,9 +122,19 @@ module.exports = {
                 });
             };
 
+            const FilterRole = await RoleModel.findById(UserData.role);
+
+            if ( !FilterRole ) {
+                return res.status(500).json({
+                    error: true,
+                    message: 'Não foi possível encontrar a função do usuário! Tente novamente mais tarde'
+                });
+            };
+
             const JWT = JWTGenerator({ 
                 id: UserData._id,
-                email
+                email,
+                role: FilterRole.name
             });
 
             if (!JWT) {
