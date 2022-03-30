@@ -7,19 +7,21 @@ const {
     ListOneUser,
     ListUsers,
     SendEmailToResetPassword,
-    RedefinePassword
+    RedefinePassword,
+    AtualizeRoleUser,
+    DeleteUser
 
 } = require('../controllers/User.controller');
 
 routes.post('/User/Create', CreateNewUser);
 routes.post('/User/Login', ConnectUser);
-routes.get('/User/:id', VerifyPermissions( [ 'Admin' ] ), ListOneUser);
-routes.get('/User', VerifyPermissions( [ 'Admin' ] ), ListUsers);
+routes.get('/User/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), ListOneUser);
+routes.get('/User', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), ListUsers);
 routes.post('/User/SendEmail', SendEmailToResetPassword);
 routes.put('/User/RedefinePassword', CodeChecker, RedefinePassword);
 
 
-routes.put('/User/AtualizePermission', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ) );
-routes.put('/User/Delete', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ) );
+routes.put('/User/AtualizeRole/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), AtualizeRoleUser);
+routes.delete('/User/Delete/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), DeleteUser);
 
 module.exports = routes;
