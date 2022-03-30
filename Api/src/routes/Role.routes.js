@@ -1,5 +1,5 @@
 const routes = require('express').Router();
-const { VerifyToken, RefreshToken } = require('../middlewares/Verify');
+const { VerifyToken, RefreshToken, VerifyPermissions } = require('../middlewares/Verify');
 
 const {
     CreateNewRole,
@@ -10,10 +10,10 @@ const {
     
 } = require('../controllers/Role.controller')
 
-routes.post('/Role/Create', VerifyToken, RefreshToken, CreateNewRole);
-routes.get('/Role/:id', VerifyToken, RefreshToken, ListOneRole);
-routes.get('/Role', VerifyToken, RefreshToken, ListRole);
-routes.put('/Role/Atualize/:id', VerifyToken, RefreshToken, UpdateRole);
-routes.delete('/Role/Remove/:id', VerifyToken, RefreshToken, DeleteRole);
+routes.post('/Role/Create', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), CreateNewRole);
+routes.get('/Role/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), ListOneRole);
+routes.get('/Role', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), ListRole);
+routes.put('/Role/Atualize/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), UpdateRole);
+routes.delete('/Role/Remove/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), DeleteRole);
 
 module.exports = routes;

@@ -1,5 +1,5 @@
 const routes = require('express').Router();
-const { VerifyToken, RefreshToken } = require('../middlewares/Verify');
+const { VerifyToken, RefreshToken, VerifyPermissions } = require('../middlewares/Verify');
 
 const {
     CreateNewCategory,
@@ -10,10 +10,10 @@ const {
     
 } = require('../controllers/Category.controller')
 
-routes.post('/Category/Create', VerifyToken, RefreshToken, CreateNewCategory);
+routes.post('/Category/Create', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), CreateNewCategory);
 routes.get('/Category/:id', VerifyToken, RefreshToken, ListOneCategory);
 routes.get('/Category', VerifyToken, RefreshToken, ListCategory);
-routes.put('/Category/Atualize/:id', VerifyToken, RefreshToken, UpdateCategory);
-routes.delete('/Category/Delete/:id', VerifyToken, RefreshToken, DeleteCategory);
+routes.put('/Category/Atualize/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), UpdateCategory);
+routes.delete('/Category/Delete/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), DeleteCategory);
 
 module.exports = routes;
