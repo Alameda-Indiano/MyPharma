@@ -18,7 +18,8 @@ module.exports = {
             
             req.DataUser = { 
                 id: decoded.id, 
-                email: decoded.email
+                email: decoded.email,
+                role: decoded.role
             };
 
             next();
