@@ -98,6 +98,43 @@ module.exports = {
                 message: error.message
             });  
         };
+    },
+
+    VerifyPermissions: ( roles ) => {
+        const RoleAuthorized = async (req, res, next) => {
+            const { role } = req.DataUser;
+    
+            try {
+    
+                if (!role) {
+                    return res.status(500).json({
+                        error: true, 
+                        message: 'O usuário não tem permissão de acesso!'
+                    });
+                };
+    
+                const TheFunctionCorrespondsToTheExpected = roles.some((RoleName) => role.includes(RoleName));
+    
+                if ( TheFunctionCorrespondsToTheExpected ) {
+                    next();
+                
+                } else {
+                    return res.status(400).json({
+                        error: true,
+                        message: 'Seu nível de acesso é muito baixo ou não existe'
+                    });
+    
+                };
+    
+            } catch (error) {
+                return res.status(500).json({
+                    error: true,
+                    message: error.message
+                });
+            };
+        };
+
+        return RoleAuthorized;
     }
     
 };
