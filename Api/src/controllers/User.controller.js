@@ -167,36 +167,56 @@ module.exports = {
     },
 
     ListUsers: async (req, res) => {
-        const Users = await UserModel.find();
+        
+        try {
+            
+            const Users = await UserModel.find();
 
-        if (!Users) {
+            if (!Users) {
+                return res.status(500).json({
+                    error: true, 
+                    message: 'Não foi possível filtrar a lista de usuário! Tente novamente mais tarde'
+                });
+            };
+
+            return res.status(200).json({
+                error: false,
+                Users
+            });
+
+        } catch (error) {
             return res.status(500).json({
-                error: true, 
-                message: 'Não foi possível filtrar a lista de usuário! Tente novamente mais tarde'
+                error: true,
+                message: error.message
             });
         };
-
-        return res.status(200).json({
-            error: false,
-            Users
-        });
 
     },
 
     ListOneUser: async (req, res) => {
-        const User = await UserModel.findById(req.params.id);
+        
+        try {
+            
+            const User = await UserModel.findById(req.params.id);
 
-        if (!User) {
-            return res.status(401).json({
+            if (!User) {
+                return res.status(401).json({
+                    error: true, 
+                    message: 'O usuário que você está tentando encontrar não existe'
+                });
+            };
+    
+            return res.status(200).json({
+                error: false,
+                User
+            });
+            
+        } catch (error) {
+            return res.status(500).json({
                 error: true, 
-                message: 'O usuário que você está tentando encontrar não existe'
+                message: error.message
             });
         };
-
-        return res.status(200).json({
-            error: false,
-            User
-        });
 
     },
     
@@ -343,103 +363,19 @@ module.exports = {
     DeleteUser: async (req, res) => {
         
         try {
-
-            const UserFilter = await UserModel.findById(req.params.id);
-
-            if (!UserFilter) {
-                return res.status(401).json({
-                    error: true,
-                    message: 'O usuário informado não existe'
-                });
-            };
-
-            const RoleFilter = await RoleModel.findById(UserFilter.role);
-
-            if (RoleFilter) {
-                const UserPositionRole = await RoleFilter.users.indexOf(req.params.id);
-                await RoleFilter.users.splice(UserPositionRole, 1);
-                await RoleFilter.save();
-
-            };
-
-            const DeleteUser = await UserModel.findByIdAndDelete(req.params.id);
-
-            if (!DeleteUser) {
-                return res.status(500).json({
-                    error: true,
-                    message: 'Não foi possível remover o usuário'
-                });
-            };
-
-            return res.status(200).json({
-                error: false,
-                message: 'Usuário removido'
-            });
-
-        } catch (error) {
-            return res.status(500).json({
-                error: true,
-                message: error.message
-            });
-        };
-
-    },
-
-    AtualizeRoleUser: async (req, res) => {
-        
-        const { role } = req.body;
-
-        try {
             
-            const User = await UserModel.findById(req.params.id);
+            const Users = await UserModel.findByIdAndDelete(req.params.id);
 
-            if (!User) {
-                return res.status(401).json({
-                    error: true,
-                    message: 'Este usuário não foi cadastrado'
-                });
-            };
-
-            const OldRole = await RoleModel.findById(User.role);
-
-            if (!OldRole) {
+            if (!Users) {
                 return res.status(500).json({
                     error: true, 
-                    message: 'Este usuário não tem nenhuma função! Tente novamente mais tarde'
+                    message: 'Não foi possível deletar está conta! Tente novamente mais tarde'
                 });
             };
-
-            const NewRole = await RoleModel.findOne({ name: role });
-
-            if (!NewRole) {
-                return res.status(401).json({
-                    error: true,
-                    message: 'A role informada não existe'
-                });
-            };
-
-            const NewUser = await UserModel.findByIdAndUpdate(req.params.id, { role: NewRole._id });
-
-            if (!NewUser) {
-                return res.status(500).json({
-                    error: true,
-                    message: 'Não foi possível atualizar a função deste usuário! Tente novamente mais tarde'
-                });
-            };
-
-            const UserPositionRole = await OldRole.users.indexOf(req.params.id);
-
-            await OldRole.users.splice(UserPositionRole, 1);
-            await OldRole.save();
-            
-            await NewRole.users.push(NewUser._id);
-            await NewRole.save();
-
-            NewUser.password = undefined;
 
             return res.status(200).json({
                 error: false,
-                user: NewUser
+                message: 'Conta deletada com sucesso'
             });
 
         } catch (error) {
@@ -448,7 +384,7 @@ module.exports = {
                 message: error.message
             });
         };
-        
+
     }
 
 };

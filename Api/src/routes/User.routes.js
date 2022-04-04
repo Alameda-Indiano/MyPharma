@@ -8,7 +8,6 @@ const {
     ListUsers,
     SendEmailToResetPassword,
     RedefinePassword,
-    AtualizeRoleUser,
     DeleteUser
 
 } = require('../controllers/User.controller');
@@ -20,8 +19,6 @@ routes.get('/User', VerifyToken, RefreshToken, VerifyPermissions( [ 'List_User' 
 routes.post('/User/SendEmail', SendEmailToResetPassword);
 routes.put('/User/RedefinePassword', CodeChecker, RedefinePassword);
 
-
-routes.put('/User/AtualizeRole/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), AtualizeRoleUser);
-routes.delete('/User/Delete/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), DeleteUser);
+routes.delete('/User/Delete/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Delete_User' ] ), DeleteUser);
 
 module.exports = routes;
