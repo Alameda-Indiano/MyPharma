@@ -1,4 +1,6 @@
 const UserModel = require('../models/User.model');
+const RoleModel = require('../models/Role.model');
+const PermissionModel = require('../models/Permission.model');
 const { JWTGenerator } = require('../util/Generator');
 const { TokenChecker } = require('../util/Verify');
 
@@ -100,22 +102,36 @@ module.exports = {
         };
     },
 
-    VerifyPermissions: ( roles ) => {
+    VerifyPermissions: ( PermissionRequired ) => {
         const RoleAuthorized = async (req, res, next) => {
             const { role } = req.DataUser;
-    
+
             try {
     
                 if (!role) {
                     return res.status(500).json({
                         error: true, 
-                        message: 'O usuário não tem permissão de acesso!'
+                        message: 'O usuário não possui nenhuma função! Tente novamente mais tarde'
                     });
                 };
+
+                const { permissions } = await RoleModel.findOne({ name: role });
+                
+                if (!permissions) {
+                    return res.status(500).json({
+                        error: true, 
+                        message: 'Não foi possível localizar as permissões deste usuário! Tente novamente mais tarde'
+                    });
+                };
+
+                const PermissionsUser = await Promise.all(permissions.map( async (PermissionId) => {
+                    const { name } = await PermissionModel.findById(PermissionId);
+                    return name;
+                }));
+
+                const UserHasPermission = PermissionsUser.some((name) => name.includes(PermissionRequired));
     
-                const TheFunctionCorrespondsToTheExpected = roles.some((RoleName) => role.includes(RoleName));
-    
-                if ( TheFunctionCorrespondsToTheExpected ) {
+                if ( UserHasPermission ) {
                     next();
                 
                 } else {

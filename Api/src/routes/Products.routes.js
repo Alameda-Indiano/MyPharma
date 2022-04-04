@@ -10,10 +10,10 @@ const {
     
 } = require('../controllers/Product.controller')
 
-routes.post('/Product/Create', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), CreateNewProduct);
+routes.post('/Product/Create', VerifyToken, RefreshToken, VerifyPermissions( [ 'Create_Product' ] ), CreateNewProduct);
 routes.get('/Product/:id', VerifyToken, RefreshToken, ListOneProduct);
 routes.get('/Product', VerifyToken, RefreshToken, ListProduct);
-routes.put('/Product/Atualize/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), UpdateProduct);
-routes.delete('/Product/Remove/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), RemoveProduct);
+routes.put('/Product/Atualize/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Atualize_Product' ] ), UpdateProduct);
+routes.delete('/Product/Remove/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Delete_Product' ] ), RemoveProduct);
 
 module.exports = routes;

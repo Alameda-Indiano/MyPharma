@@ -15,8 +15,8 @@ const {
 
 routes.post('/User/Create', CreateNewUser);
 routes.post('/User/Login', ConnectUser);
-routes.get('/User/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), ListOneUser);
-routes.get('/User', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), ListUsers);
+routes.get('/User/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'List_User' ] ), ListOneUser);
+routes.get('/User', VerifyToken, RefreshToken, VerifyPermissions( [ 'List_User' ] ), ListUsers);
 routes.post('/User/SendEmail', SendEmailToResetPassword);
 routes.put('/User/RedefinePassword', CodeChecker, RedefinePassword);
 

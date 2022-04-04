@@ -10,10 +10,10 @@ const {
     
 } = require('../controllers/Role.controller')
 
-routes.post('/Role/Create', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), CreateNewRole);
-routes.get('/Role/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), ListOneRole);
-routes.get('/Role', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), ListRole);
-routes.put('/Role/Atualize/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), UpdateRole);
-routes.delete('/Role/Remove/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Admin' ] ), DeleteRole);
+routes.post('/Role/Create', VerifyToken, RefreshToken, VerifyPermissions( [ 'Create_Role' ] ), CreateNewRole);
+routes.get('/Role/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'List_Role' ] ), ListOneRole);
+routes.get('/Role', VerifyToken, RefreshToken, VerifyPermissions( [ 'List_Role' ] ), ListRole);
+routes.put('/Role/Atualize/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Atualize_Role' ] ), UpdateRole);
+routes.delete('/Role/Remove/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Delete_Role' ] ), DeleteRole);
 
 module.exports = routes;

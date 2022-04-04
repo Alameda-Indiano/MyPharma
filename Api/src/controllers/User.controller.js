@@ -54,7 +54,16 @@ module.exports = {
                 });
             };
 
-            const NewUser = await UserModel.create({ name, email, password: EncryptedPassword, role: process.env.Role_User });
+            const RoleUser = await RoleModel.findOne({ name: 'User' });
+
+            if (!RoleUser) {
+                return res.status(400).json({
+                    error: true,
+                    message: 'Não foi possível atribuir uma função para o novo usuário! Tente novamente mais tarde'
+                })
+            };
+
+            const NewUser = await UserModel.create({ name, email, password: EncryptedPassword, role: RoleUser._id });
             
             if (!NewUser) {
                 return res.status(500).json({
@@ -63,9 +72,8 @@ module.exports = {
                 });
             };
 
-            const FilterRole = await RoleModel.findById(process.env.Role_User);
-            FilterRole.users.push(NewUser._id);
-            FilterRole.save();
+            RoleUser.users.push(NewUser._id);
+            RoleUser.save();
             
             NewUser.password = undefined;
 
