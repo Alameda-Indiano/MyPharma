@@ -5,7 +5,7 @@ const {
     CreateNewUser, 
     ConnectUser,
     ListOneUser,
-    ListUsers,
+    ListUser,
     SendEmailToResetPassword,
     RedefinePassword,
     DeleteUser
@@ -15,9 +15,9 @@ const {
 routes.post('/User/Create', CreateNewUser);
 routes.post('/User/Login', ConnectUser);
 routes.get('/User/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'List_User' ] ), ListOneUser);
-routes.get('/User', VerifyToken, RefreshToken, VerifyPermissions( [ 'List_User' ] ), ListUsers);
+routes.get('/User', VerifyToken, RefreshToken, VerifyPermissions( [ 'List_User' ] ), ListUser);
 routes.post('/User/SendEmail', SendEmailToResetPassword);
-routes.put('/User/RedefinePassword', CodeChecker, RedefinePassword);
+routes.put('/User/RedefinePassword', CodeChecker('User'), RedefinePassword);
 
 routes.delete('/User/Delete/:id', VerifyToken, RefreshToken, VerifyPermissions( [ 'Delete_User' ] ), DeleteUser);
 

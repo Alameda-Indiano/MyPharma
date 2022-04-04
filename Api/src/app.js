@@ -26,6 +26,7 @@ class AppController {
         this.express.use(require('./routes/Brand.routes'));
         this.express.use(require('./routes/Permission.routes'));
         this.express.use(require('./routes/Role.routes'));
+        this.express.use(require('./routes/Admin.routes'));
     };
 };
 

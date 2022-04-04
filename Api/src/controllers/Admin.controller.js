@@ -1,4 +1,4 @@
-const UserModel = require('../models/User.model');
+const AdminModel = require('../models/Admin.model');
 const RoleModel = require('../models/Role.model');
 const SendEmail = require('../Services/Emails/SendEmail');
 const { EmailResetPassword } = require('../Services/Emails/Templates/ResetPassword');
@@ -13,35 +13,35 @@ const {
 const { EncryptedPasswordChecker } = require('../util/Verify');
 
 module.exports = {
-    CreateNewUser: async (req, res) => {
-        const { name, email, password } = req.body;
+    CreateNewAdmin: async (req, res) => {
+        const { name, email, password, role } = req.body;
 
         try {
             if (!name) {
                 return res.status(400).json({
                     error: true,
-                    message: 'É necessário informa o nome de usuário antes de prosseguir'
+                    message: 'É necessário informa o nome do Admin antes de prosseguir'
                 });
             };
 
             if (!email) {
                 return res.status(400).json({
                     error: true,
-                    message: 'É necessário informa o email de usuário antes de prosseguir'
+                    message: 'É necessário informa o email do admin antes de prosseguir'
                 });
             };
 
             if (!password) {
                 return res.status(400).json({
                     error: true,
-                    message: 'É necessário informa a senha de usuário antes de prosseguir'
+                    message: 'É necessário informa a uma senha inicial para este admin antes de prosseguir'
                 });
             };
 
-            if (await UserModel.findOne({ email })) {
+            if (await AdminModel.findOne({ email })) {
                 return res.status(400).json({
                     error: true,
-                    message: 'Este email já foi cadastrado, faça login ou tente novamente com outro endereço de email'
+                    message: 'Já existe um admin com este endereço de Email'
                 });
             };
 
@@ -54,32 +54,37 @@ module.exports = {
                 });
             };
 
-            const RoleUser = await RoleModel.findOne({ name: 'User' });
+            const RoleAdmin = await RoleModel.findOne({ name: role ? role : 'Admin' });
 
-            if (!RoleUser) {
-                return res.status(400).json({
+            if (!RoleAdmin) {
+                return res.status(500).json({
                     error: true,
-                    message: 'Não foi possível atribuir uma função para o novo usuário! Tente novamente mais tarde'
+                    message: 'Não foi possível cadastrar uma função para este Admin! Tente novamente mais tarde'
                 })
             };
 
-            const NewUser = await UserModel.create({ name, email, password: EncryptedPassword, role: RoleUser._id });
+            const NewAdmin = await AdminModel.create({ 
+                name, 
+                email, 
+                password: EncryptedPassword, 
+                role: RoleAdmin._id
+            });
             
-            if (!NewUser) {
+            if (!NewAdmin) {
                 return res.status(500).json({
                     error: true, 
-                    message: 'Não foi possível cadastrar o usuário! Tente novamente mais tarde'
+                    message: 'Não foi possível cadastrar um novo Admin! Tente novamente mais tarde'
                 });
             };
 
-            RoleUser.users.push(NewUser._id);
-            RoleUser.save();
+            RoleAdmin.users.push(NewAdmin._id);
+            RoleAdmin.save();
             
-            NewUser.password = undefined;
+            NewAdmin.password = undefined;
 
             return res.status(201).json({
                 error: false,
-                user: NewUser
+                admin: NewAdmin
             });
 
         } catch (error) {
@@ -91,36 +96,36 @@ module.exports = {
         };
     },
 
-    ConnectUser: async (req, res) => {
+    ConnectAdmin: async (req, res) => {
         const { email, password } = req.body;
 
         try {
             if (!email) {
                 return res.status(400).json({
                     error: true,
-                    message: 'É necessário informa o email de usuário antes de prosseguir'
+                    message: 'É necessário informa o seu Email antes de prosseguir'
                 });
             };
 
             if (!password) {
                 return res.status(400).json({
                     error: true,
-                    message: 'É necessário informa a senha de usuário antes de prosseguir'
+                    message: 'É necessário informa a sua senha antes de prosseguir'
                 });
             };
 
-            const UserData = await UserModel.findOne({ email }).select('+password');
+            const AdminData = await AdminModel.findOne({ email }).select('+password');
 
-            if (!UserData) {
-                return res.status(401).json({
+            if (!AdminData) {
+                return res.status(500).json({
                     error: true, 
-                    message: 'Não foi encontrado nenhum usuário com este endereço de email'
+                    message: 'Não foi possível encontrar o Admin! Tente novamente mais tarde'
                 });
             };
 
             const PasswordIsTrue = EncryptedPasswordChecker({ 
                 Password: password, 
-                PasswordToVerify:  UserData.password 
+                PasswordToVerify:  AdminData.password 
             });
 
             if (!PasswordIsTrue) {
@@ -130,17 +135,17 @@ module.exports = {
                 });
             };
 
-            const FilterRole = await RoleModel.findById(UserData.role);
+            const FilterRole = await RoleModel.findById(AdminData.role);
 
             if ( !FilterRole ) {
                 return res.status(500).json({
                     error: true,
-                    message: 'Não foi possível encontrar a função do usuário! Tente novamente mais tarde'
+                    message: 'Não foi possível encontrar a função deste Admin! Tente novamente mais tarde'
                 });
             };
 
             const JWT = JWTGenerator({ 
-                id: UserData._id,
+                id: AdminData._id,
                 email,
                 role: FilterRole.name
             });
@@ -166,7 +171,7 @@ module.exports = {
         }
     },
 
-    ListUser: async (req, res) => {
+    ListAdmin: async (req, res) => {
         
         try {
             
@@ -193,7 +198,7 @@ module.exports = {
 
     },
 
-    ListOneUser: async (req, res) => {
+    ListOneAdmin: async (req, res) => {
         
         try {
             
@@ -360,7 +365,7 @@ module.exports = {
 
     },
 
-    DeleteUser: async (req, res) => {
+    DeleteAdmin: async (req, res) => {
         
         try {
             

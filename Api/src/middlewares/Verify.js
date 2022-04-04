@@ -1,46 +1,65 @@
 const UserModel = require('../models/User.model');
+const AdminModel = require('../models/Admin.model');
 const RoleModel = require('../models/Role.model');
 const PermissionModel = require('../models/Permission.model');
-const { JWTGenerator } = require('../util/Generator');
+
+const SendEmail = require('../Services/Emails/SendEmail');
+const { TwoStepConfirmation } = require('../Services/Emails/Templates/TwoStepConfirmation');
+
+const {
+    JWTGenerator,
+    RandomCodeGenerator
+    
+} = require('../util/Generator');
+
 const { TokenChecker } = require('../util/Verify');
 
 module.exports = {
-    CodeChecker: async (req, res, next) => {
-        const { email, code } = req.body;
+    CodeChecker: ( Model ) => {
 
-        try {
-            const User = await UserModel.findOne({ email }).select('+Code +CodeExpiresIn');
+        const Checker = async (req, res, next) => {
+            const { code, email } = req.body;
+    
+            try {
 
-            if (!User) {
+                const User = Model === 'User' ?
+                    await UserModel.findOne({ email }).select('+Code +CodeExpiresIn') :
+                    await AdminModel.findOne({ email }).select('+Code +CodeExpiresIn');
+    
+                if (!User) {
+                    return res.status(500).json({
+                        error: true,
+                        message: 'Não foi possível localizar nenhum usuário com este endereço de email! Tente novamente mais tarde'
+                    });
+                };
+    
+                if (new Date() > User.CodeExpiresIn) {
+                    return res.status(403).json({
+                        error: true, 
+                        message: 'O seu código expirou!'
+                    });
+                };
+
+                if (User.Code !== code) {
+                    return res.status(403).json({
+                        error: true, 
+                        message: 'Código inválido!'
+                    });
+                };
+    
+                next();
+    
+            } catch (error) {
                 return res.status(500).json({
-                    error: true,
-                    message: 'Não foi possível localizar nenhum usuário com este endereço de email! Tente novamente mais tarde'
-                });
-            };
-
-            if (User.Code !== code) {
-                return res.status(403).json({
                     error: true, 
-                    message: 'Código inválido!'
+                    message: error.message
                 });
+    
             };
-
-            if (new Date() > User.CodeExpiresIn) {
-                return res.status(403).json({
-                    error: true, 
-                    message: 'O seu código expirou!'
-                });
-            };
-
-            next();
-
-        } catch (error) {
-            return res.status(500).json({
-                error: true, 
-                message: error.message
-            });
-
+    
         };
+
+        return Checker;
 
     },
 
@@ -151,6 +170,120 @@ module.exports = {
         };
 
         return RoleAuthorized;
+    },
+
+    TwoStepVerification: ( Model ) => {
+
+        const Verification = async ( req, res, next ) => {
+            const { code, email } = req.body;
+
+            try {
+
+                if (code) {
+                   
+                    next();
+
+                } else {
+
+                    const User = Model === 'User' ? 
+                        await UserModel.findOne({ email }).select('+Code +CodeExpiresIn') :
+                        await AdminModel.findOne({ email }).select('+Code +CodeExpiresIn');
+
+                    if (!User) {
+                        return res.status(401).json({
+                            error: true, 
+                            message: 'É necessário informar o seu email antes de prosseguir! Tente novamente mais tarde'
+                        });
+                    };
+        
+                    const { code, CodeExpiresIn } = RandomCodeGenerator();
+        
+                    if (!code || !CodeExpiresIn) {
+                        return res.status(500).json({
+                            error: true, 
+                            message: 'Não foi possível gerar um código! Tente novamente mais tarde'
+                        });
+                    };
+        
+                    const NewParameters = Model === 'User' ? 
+                        await UserModel.findByIdAndUpdate( User._id , { 
+                            Code: code, 
+                            CodeExpiresIn: CodeExpiresIn 
+                            
+                        }, { new: true }).select('+Code +CodeExpiresIn') 
+                        :
+                        await AdminModel.findByIdAndUpdate( User._id , { 
+                            Code: code, 
+                            CodeExpiresIn: CodeExpiresIn 
+                            
+                        }, { new: true }).select('+Code +CodeExpiresIn') 
+        
+        
+                    if (!NewParameters.CodeExpiresIn || !NewParameters.Code) {
+                        return res.status(500).json({
+                            error: true, 
+                            message: 'Não foi possível cadastrar o código de verificação! Tente novamente mais tarde'
+                        });
+                    };
+        
+                    const EmailUser = email.toLowerCase();
+        
+                    const BodyEmail = TwoStepConfirmation({ 
+                        code,
+                        Email: EmailUser
+                    });
+        
+                    if (!BodyEmail) {
+                        return res.status(500).json({
+                            error: true,
+                            message: 'O servidor não conseguiu gerar um Email! Tente novamente mais tarde'
+                        });
+                    };
+        
+                    const { error, message } = await SendEmail.send({ 
+                        to: EmailUser, 
+                        subject: 'Confirmação em duas etapas MyPharma', 
+                        body: BodyEmail
+        
+                    }).then(() => {
+                        return {
+                            error: false,
+                            message: `Um código de confirmação foi enviado para ${EmailUser}`
+                        };
+        
+                    }).catch((error) => {
+                        return {
+                            error: true,
+                            message: error.message
+                        };
+        
+                    });
+        
+                    if (error) {
+                        return res.status(500).json({
+                            error, 
+                            message
+                        });
+                    };
+        
+                    return res.status(200).json({
+                        error, 
+                        message
+                    });
+
+                };
+    
+            } catch (error) {
+                return res.status(500).json({
+                    error: true,
+                    message: error.message
+                });
+            };
+    
+        };
+
+        return Verification;
+
     }
     
 };
