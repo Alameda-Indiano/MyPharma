@@ -364,14 +364,27 @@ module.exports = {
         
         try {
             
-            const Users = await UserModel.findByIdAndDelete(req.params.id);
+            const User = await UserModel.findByIdAndDelete(req.params.id);
 
-            if (!Users) {
+            if (!User) {
                 return res.status(500).json({
                     error: true, 
                     message: 'Não foi possível deletar está conta! Tente novamente mais tarde'
                 });
             };
+
+            const RoleFilter = await RoleModel.findById(User.role);
+
+            if (!RoleFilter) {
+                return res.status(500).json({
+                    error: true, 
+                    message: 'Não foi possível localizar a função deste usuário! Tente novamente mais tarde'
+                });
+            };
+
+            const UserPositionRole = await RoleFilter.users.indexOf(User._id);
+            RoleFilter.users.splice(UserPositionRole, 1);
+            await RoleFilter.save();
 
             return res.status(200).json({
                 error: false,

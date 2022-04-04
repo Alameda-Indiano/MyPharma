@@ -175,18 +175,18 @@ module.exports = {
         
         try {
             
-            const Users = await UserModel.find();
+            const Admin = await AdminModel.find();
 
-            if (!Users) {
+            if (!Admin) {
                 return res.status(500).json({
                     error: true, 
-                    message: 'Não foi possível filtrar a lista de usuário! Tente novamente mais tarde'
+                    message: 'Não foi possível filtrar a lista de Admins! Tente novamente mais tarde'
                 });
             };
 
             return res.status(200).json({
                 error: false,
-                Users
+                Admin
             });
 
         } catch (error) {
@@ -202,18 +202,18 @@ module.exports = {
         
         try {
             
-            const User = await UserModel.findById(req.params.id);
+            const Admin = await AdminModel.findById(req.params.id);
 
-            if (!User) {
+            if (!Admin) {
                 return res.status(401).json({
                     error: true, 
-                    message: 'O usuário que você está tentando encontrar não existe'
+                    message: 'O admin que você está tentando encontrar não existe'
                 });
             };
     
             return res.status(200).json({
                 error: false,
-                User
+                Admin
             });
             
         } catch (error) {
@@ -369,14 +369,27 @@ module.exports = {
         
         try {
             
-            const Users = await UserModel.findByIdAndDelete(req.params.id);
+            const Admin = await AdminModel.findByIdAndDelete(req.params.id);
 
-            if (!Users) {
+            if (!Admin) {
                 return res.status(500).json({
                     error: true, 
                     message: 'Não foi possível deletar está conta! Tente novamente mais tarde'
                 });
             };
+
+            const RoleFilter = await RoleModel.findById(Admin.role);
+
+            if (!RoleFilter) {
+                return res.status(500).json({
+                    error: true, 
+                    message: 'Não foi possível localizar a função deste Admin! Tente novamente mais tarde'
+                });
+            };
+
+            const AdminPositionRole = await RoleFilter.users.indexOf(Admin._id);
+            RoleFilter.users.splice(AdminPositionRole, 1);
+            await RoleFilter.save();
 
             return res.status(200).json({
                 error: false,
