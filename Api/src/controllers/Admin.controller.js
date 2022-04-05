@@ -1,12 +1,10 @@
 const AdminModel = require('../models/Admin.model');
+const UserModel = require('../models/User.model');
 const RoleModel = require('../models/Role.model');
-const SendEmail = require('../Services/Emails/SendEmail');
-const { EmailResetPassword } = require('../Services/Emails/Templates/ResetPassword');
 
 const { 
     EncryptedPasswordGenerator, 
-    JWTGenerator,
-    RandomCodeGenerator
+    JWTGenerator
 
 } = require('../util/Generator');
 
@@ -42,6 +40,13 @@ module.exports = {
                 return res.status(400).json({
                     error: true,
                     message: 'Já existe um admin com este endereço de Email'
+                });
+            };
+
+            if (await UserModel.findOne({ email })) {
+                return res.status(400).json({
+                    error: true,
+                    message: 'Existe um usuário cadastrado com este endereço de Email'
                 });
             };
 
@@ -224,103 +229,6 @@ module.exports = {
         };
 
     },
-    
-    SendEmailToResetPassword: async (req, res) => {
-        const { email } = req.body;
-
-        try {
-            if (!email) {
-                return res.status(401).json({
-                    error: true,
-                    message: 'É necessário informar o seu email antes de prosseguir'
-                });
-            };
-
-            const User = await UserModel.findOne({ email });
-            
-            if (!User) {
-                return res.status(401).json({
-                    error: true,
-                    message: 'Usuário não está cadastrado'
-                });
-            };
-
-            const { code, CodeExpiresIn } = RandomCodeGenerator();
-
-            if (!code || !CodeExpiresIn) {
-                return res.status(500).json({
-                    error: true, 
-                    message: 'Não foi possível gerar um código! Tente novamente mais tarde'
-                });
-            };
-
-            const NewParameters = await UserModel.findByIdAndUpdate( User._id , { 
-                Code: code, 
-                CodeExpiresIn: CodeExpiresIn 
-                
-            }, { new: true }).select('+Code +CodeExpiresIn');
-
-            if (!NewParameters.CodeExpiresIn || !NewParameters.Code) {
-                return res.status(500).json({
-                    error: true, 
-                    message: 'Não foi possível cadastrar o código de verificação! Tente novamente mais tarde'
-                });
-            };
-
-            const EmailUser = email.toLowerCase();
-
-            const BodyEmail = EmailResetPassword({ 
-                code,
-                Email: EmailUser
-            });
-
-            if (!BodyEmail) {
-                return res.status(500).json({
-                    error: true,
-                    message: 'O servidor não conseguiu gerar um Email! Tente novamente mais tarde'
-                });
-            };
-
-            const { error, message } = await SendEmail.send({ 
-                to: EmailUser, 
-                subject: 'Redefinir Senha do MyPharma', 
-                body: BodyEmail
-
-            }).then(() => {
-                return {
-                    error: false,
-                    message: `Um email foi enviado para ${EmailUser}`
-                };
-
-            }).catch((error) => {
-                return {
-                    error: true,
-                    message: error.message
-                };
-
-            });
-
-            if (error) {
-                return res.status(500).json({
-                    error, 
-                    message
-                });
-            };
-
-            return res.status(200).json({
-                error, 
-                message
-            });
-
-        } catch (error) {
-            return res.status(500).json({
-                error: true, 
-                message: error.message
-            });
-
-        };
-
-    },
 
     RedefinePassword: async (req, res) => {
         const { email, password } = req.body;
@@ -335,7 +243,7 @@ module.exports = {
                 });
             };
 
-            const UserWithNewPassword = await UserModel.findOneAndUpdate(
+            const AdminWithNewPassword = await AdminModel.findOneAndUpdate(
                 { email }, { 
                     password: EncryptedPassword, 
                     CodeExpiresIn: undefined, 
@@ -343,16 +251,16 @@ module.exports = {
 
                 }, { new: true }).select('-CodeExpiresIn -Code');
 
-            if (!UserWithNewPassword) {
+            if (!AdminWithNewPassword) {
                 return res.status(500).json({
                     error: true, 
-                    message: 'Não foi possível redefinir senha! Tente novamente mais tarde'
+                    message: 'Não foi possível redefinir a senha! Tente novamente mais tarde'
                 });
             };
 
             return res.status(200).json({
                 error: false, 
-                user: UserWithNewPassword
+                Admin: AdminWithNewPassword
             });
 
         } catch (error) {
